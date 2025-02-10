@@ -1,0 +1,49 @@
+[
+    {
+        "id": 1,
+        "title": "Iphone 14",
+        "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maxime, consectetur.",
+        "price": 999,
+        "thumbnails": "",
+        "code": 12121,
+        "stock": 20,
+        "category": "Celular",
+        "status": true
+    },
+
+    {
+        "id": 2,
+        "title": "Samsung Galaxy S22",
+        "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maxime, consectetur.",
+        "price": 899,
+        "thumbnails": "",
+        "code": 13131,
+        "stock": 17,
+        "category": "Celular",
+        "status": true
+    },
+
+    {
+        "id": 3,
+        "title": "Samsung Galaxy Tab S8",
+        "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maxime, consectetur.",
+        "price": 799,
+        "thumbnails": "",
+        "code": 14141,
+        "stock": 12,
+        "category": "Tablet",
+        "status": true
+    },
+
+    {
+        "id": 3,
+        "title": "iPad Pro",
+        "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Maxime, consectetur.",
+        "price": 1099,
+        "thumbnails": "",
+        "code": 15151,
+        "stock": 14,
+        "category": "Tablet",
+        "status": true
+    }
+]
