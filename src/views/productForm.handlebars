@@ -1,0 +1,225 @@
+<div class="container">
+    <h1>Crear Nuevo Producto</h1>
+
+    <form id="productForm" class="product-form">
+        <div class="form-group">
+            <label for="title">Título</label>
+            <input type="text" id="title" name="title" required class="form-input" placeholder="Nombre del producto">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Descripción</label>
+            <textarea id="description" name="description" required class="form-input"
+                placeholder="Describe el producto"></textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                <label for="price">Precio</label>
+                <input type="number" id="price" name="price" step="0.01" required class="form-input" placeholder="0.00">
+            </div>
+
+            <div class="form-group half">
+                <label for="stock">Stock</label>
+                <input type="number" id="stock" name="stock" required class="form-input"
+                    placeholder="Cantidad disponible">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                <label for="code">Código</label>
+                <input type="text" id="code" name="code" required class="form-input"
+                    placeholder="Código único del producto">
+            </div>
+
+            <div class="form-group half">
+                <label for="category">Categoría</label>
+                <input type="text" id="category" name="category" required class="form-input"
+                    placeholder="Categoría del producto">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="thumbnail">Ruta de imagen</label>
+            <input type="text" id="thumbnail" name="thumbnail" class="form-input" placeholder="URL o ruta de la imagen">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">Crear Producto</button>
+            <button type="reset" class="btn-reset">Limpiar Formulario</button>
+        </div>
+    </form>
+
+    <div id="messageContainer" class="message-container"></div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        color: #2c5282;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .product-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .half {
+        flex: 1;
+    }
+
+    label {
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    .form-input {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #2c5282;
+        box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+    }
+
+    textarea.form-input {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-submit,
+    .btn-reset {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
+
+    .btn-submit {
+        background-color: #2c5282;
+        color: white;
+        flex: 2;
+    }
+
+    .btn-reset {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        flex: 1;
+    }
+
+    .btn-submit:hover,
+    .btn-reset:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:active,
+    .btn-reset:active {
+        transform: translateY(1px);
+    }
+
+    .message-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 6px;
+        display: none;
+    }
+
+    .success {
+        display: block;
+        background-color: #def7ec;
+        border: 1px solid #0e9f6e;
+        color: #046c4e;
+    }
+
+    .error {
+        display: block;
+        background-color: #fde8e8;
+        border: 1px solid #f98080;
+        color: #c81e1e;
+    }
+</style>
+
+<script>
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const messageContainer = document.getElementById('messageContainer');
+
+        try {
+            const formData = new FormData(e.target);
+            const productData = {
+                title: formData.get('title'),
+                description: formData.get('description'),
+                price: parseFloat(formData.get('price')),
+                code: formData.get('code'),
+                stock: parseInt(formData.get('stock')),
+                category: formData.get('category'),
+                thumbnail: formData.get('thumbnail')
+            };
+
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                messageContainer.className = 'message-container success';
+                messageContainer.textContent = '¡Producto creado exitosamente!';
+                e.target.reset();
+
+                if (typeof socket !== 'undefined') {
+                    socket.emit('newProduct', result.payload);
+                }
+
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            messageContainer.className = 'message-container error';
+            messageContainer.textContent = `Error: ${error.message}`;
+        }
+    });
+</script>

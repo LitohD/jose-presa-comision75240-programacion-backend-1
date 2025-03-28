@@ -1,0 +1,46 @@
+<div class="error-container">
+    <h1>Error</h1>
+    <div class="error-message">
+        {{#if error}}
+            <p>{{error}}</p>
+        {{else}}
+            <p>Ha ocurrido un error inesperado</p>
+        {{/if}}
+    </div>
+    <a href="/home" class="back-button">Volver al inicio</a>
+</div>
+
+<style>
+.error-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-message {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    border-radius: 4px;
+    color: #dc2626;
+}
+
+.back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #2563eb;
+}
+</style> 

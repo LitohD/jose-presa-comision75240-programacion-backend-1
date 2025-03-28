@@ -1,0 +1,182 @@
+<div class="product-detail-container">
+    <div class="product-info">
+        <h1>{{product.title}}</h1>
+        <p class="description">{{product.description}}</p>
+        <p class="price">${{product.price}}</p>
+        <p class="stock">Stock: {{product.stock}}</p>
+        <p class="category">Categoría: {{product.category}}</p>
+        <div class="actions">
+            <button class="add-to-cart" onclick="addToCart('{{product._id}}')">Agregar al Carrito</button>
+            <button class="delete-product" onclick="deleteProduct('{{product._id}}')">Eliminar Producto</button>
+        </div>
+    </div>
+</div>
+
+<script>
+async function addToCart(productId) {
+    try {
+        let cartId = localStorage.getItem('cartId');
+        
+        if (cartId) {
+            const checkCartResponse = await fetch(`/api/carts/${cartId}`);
+            if (!checkCartResponse.ok) {
+                console.log('Carrito no encontrado, creando uno nuevo...');
+                localStorage.removeItem('cartId');
+                cartId = null;
+            }
+        }
+
+        if (!cartId) {
+            const createCartResponse = await fetch('/api/carts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!createCartResponse.ok) {
+                throw new Error('Error al crear el carrito');
+            }
+            
+            const cartResult = await createCartResponse.json();
+            cartId = cartResult.payload._id;
+            localStorage.setItem('cartId', cartId);
+            console.log('Nuevo carrito creado:', cartId);
+        }
+
+        const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: 1 })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Producto agregado al carrito',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        } else {
+            throw new Error(result.error || 'Error al agregar al carrito');
+        }
+    } catch (error) {
+        console.error('Error completo:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Error al agregar al carrito: ${error.message}`
+        });
+    }
+}
+
+async function deleteProduct(productId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert('Producto eliminado exitosamente');
+            window.location.href = '/products';
+        } else {
+            alert('Error al eliminar el producto');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el producto');
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+.product-detail-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.product-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-product {
+    background-color: #f44336;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.description {
+    line-height: 1.6;
+    color: #666;
+    max-width: 500px;
+    margin: 1rem auto;
+}
+
+.stock, .category {
+    color: #555;
+    font-size: 1.1rem;
+}
+</style> 

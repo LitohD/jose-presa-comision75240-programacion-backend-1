@@ -1,19 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const ProductManager = require('../managers/ProductManager');
-const productManager = new ProductManager('./data/products.json');
+const { Router } = require('express');
+const ViewsController = require('../controllers/views.controller');
+const router = Router();
 
-router.get('/', async (req, res) => {
-    try {
-        const products = await productManager.getProducts();
-        res.render('home', { products });
-    } catch (error) {
-        res.status(500).render('home', { error: 'Error al cargar productos' });
-    }
-});
+router.get('/', ViewsController.renderHome);
+router.get('/products', ViewsController.renderProducts);
+router.get('/realtimeproducts', ViewsController.renderRealTimeProducts);
+router.get('/product/create', ViewsController.renderProductForm);
+router.get('/products/:pid', ViewsController.renderProductDetail);
+router.get('/carts/:cid', ViewsController.renderCart);
 
-router.get('/realtimeproducts', (req, res) => {
-    res.render('realTimeProducts');
-});
-
-module.exports = router; 
+module.exports = router;

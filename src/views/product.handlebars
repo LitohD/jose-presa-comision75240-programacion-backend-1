@@ -1,0 +1,147 @@
+<div class="product-detail-container">
+    <div class="product-image">
+        <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}">
+    </div>
+    <div class="product-info">
+        <h1>{{product.title}}</h1>
+        <p class="description">{{product.description}}</p>
+        <p class="price">${{product.price}}</p>
+        <p class="stock">Stock: {{product.stock}}</p>
+        <p class="category">Categoría: {{product.category}}</p>
+        <div class="actions">
+            <button class="add-to-cart" onclick="addToCart('{{product._id}}')">Agregar al Carrito</button>
+            <button class="delete-product" onclick="deleteProduct('{{product._id}}')">Eliminar Producto</button>
+        </div>
+    </div>
+</div>
+
+<script>
+async function deleteProduct(productId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert('Producto eliminado exitosamente');
+            window.location.href = '/products';
+        } else {
+            alert('Error al eliminar el producto');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar el producto');
+    }
+}
+
+async function addToCart(productId) {
+    try {
+        let cartId = localStorage.getItem('cartId');
+        
+        if (!cartId) {
+            const createCartResponse = await fetch('/api/carts', {
+                method: 'POST'
+            });
+            const cartResult = await createCartResponse.json();
+            cartId = cartResult.payload._id;
+            localStorage.setItem('cartId', cartId);
+        }
+        
+        const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: 1 })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert('Producto agregado al carrito');
+        } else {
+            alert('Error al agregar al carrito');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al agregar al carrito');
+    }
+}
+</script>
+
+<style>
+.product-detail-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    gap: 2rem;
+}
+
+.product-image {
+    flex: 1;
+}
+
+.product-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-product {
+    background-color: #f44336;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.description {
+    line-height: 1.6;
+    color: #666;
+}
+
+.stock, .category {
+    color: #555;
+}
+</style> 

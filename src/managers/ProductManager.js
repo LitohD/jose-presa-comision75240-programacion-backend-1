@@ -1,95 +1,54 @@
-const fs = require('fs').promises;
+const Product = require('../models/product.model');
 
 class ProductManager {
-    constructor(path) {
-        this.path = path;
-        this.products = [];
-        this.nextId = 1; 
-        this.initialize();
-    }
-
-    async initialize() {
-        try {
-            const data = await fs.readFile(this.path, 'utf-8');
-            const fileContent = JSON.parse(data);
-            this.products = fileContent.products || [];
-            if (this.products.length > 0) {
-                this.nextId = Math.max(...this.products.map(p => p.id)) + 1;
-            }
-        } catch (error) {
-            
-            this.products = [];
-        }
-    }
-
-    async saveToFile() {
-        await fs.writeFile(this.path, JSON.stringify({ products: this.products }, null, 2));
-    }
-
     async addProduct(productData) {
-        const { title, description, price, stock, category } = productData;
-
-        if (!title || !description || !price || !stock || !category) {
-            throw new Error("Todos los campos son obligatorios");
+        try {
+            const product = new Product(productData);
+            await product.save();
+            return product;
+        } catch (error) {
+            throw error;
         }
-
-        const newProduct = {
-            id: this.nextId++,
-            title,
-            description,
-            price: Number(price),
-            stock: Number(stock),
-            category
-        };
-
-        this.products.push(newProduct);
-        await this.saveToFile();
-        return newProduct;
     }
 
-    async getProducts() {
+    async getProducts(limit = 10, page = 1, sort = null, query = {}) {
         try {
-            const data = await fs.readFile(this.path, 'utf-8');
-            const fileContent = JSON.parse(data);
-            return fileContent.products || [];
+            const options = {
+                page: page,
+                limit: limit,
+                sort: sort ? { price: sort === 'asc' ? 1 : -1 } : undefined,
+                lean: true
+            };
+
+            return await Product.paginate(query, options);
         } catch (error) {
-            return [];
+            throw error;
         }
     }
 
     async getProductById(id) {
-        const product = this.products.find(p => p.id === id);
-        if (!product) {
-            throw new Error("Producto no encontrado");
+        try {
+            return await Product.findById(id);
+        } catch (error) {
+            throw error;
         }
-        return product;
     }
 
     async updateProduct(id, updateData) {
-        const index = this.products.findIndex(p => p.id === id);
-        if (index === -1) {
-            throw new Error("Producto no encontrado");
+        try {
+            return await Product.findByIdAndUpdate(id, updateData, { new: true });
+        } catch (error) {
+            throw error;
         }
-
-        const { id: _, ...updateFields } = updateData;
-        this.products[index] = {
-            ...this.products[index],
-            ...updateFields
-        };
-
-        await this.saveToFile();
-        return this.products[index];
     }
 
     async deleteProduct(id) {
-        const index = this.products.findIndex(p => p.id === Number(id));
-        if (index === -1) {
-            throw new Error("Producto no encontrado");
+        try {
+            return await Product.findByIdAndDelete(id);
+        } catch (error) {
+            throw error;
         }
-
-        this.products.splice(index, 1);
-        await this.saveToFile();
     }
 }
 
-module.exports = ProductManager; 
+module.exports = ProductManager;
