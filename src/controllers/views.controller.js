@@ -128,7 +128,7 @@ class ViewsController {
                     prevLink: result.hasPrevPage ? `/products?page=${result.prevPage}${sort ? `&sort=${sort}` : ''}${query ? `&query=${query}` : ''}` : null,
                     nextLink: result.hasNextPage ? `/products?page=${result.nextPage}${sort ? `&sort=${sort}` : ''}${query ? `&query=${query}` : ''}` : null
                 },
-                categories: categories // Pasamos las categorías a la vista
+                categories: categories 
             });
         } catch (error) {
             res.status(500).render('error', { error: error.message });
